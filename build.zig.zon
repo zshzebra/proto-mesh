@@ -1,0 +1,17 @@
+.{
+    .name = .proto_mesh,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.15.2",
+    .paths = .{""},
+    .fingerprint = 0x59b0404d439dc46c,
+    .dependencies = .{
+        .serial = .{
+            .url = "git+https://github.com/ZigEmbeddedGroup/serial?ref=master#fbd7389ff8bbc9fa362aa74081588755b5d028a0",
+            .hash = "serial-0.0.1-PoeRzF60AAAN8Iu0yXTIX-t3DVzsnmN7vWHKM2HA2Zbq",
+        },
+        .protobuf = .{
+            .url = "git+https://github.com/Arwalk/zig-protobuf?ref=master#9691a3d4cceceda61ed808d54fb0393c2a30d6fd",
+            .hash = "protobuf-3.0.0-0e82apPSKAD0Jh0OaZ2VkXqMIePmgOtuYrXpOh2eruDP",
+        },
+    },
+}
