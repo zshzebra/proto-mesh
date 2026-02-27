@@ -65,20 +65,21 @@ pub fn main() !void {
         frame_reader.feed(read_buf[0..n]);
 
         while (frame_reader.nextPacket()) |payload| {
+            var arena = std.heap.ArenaAllocator.init(allocator);
+            defer arena.deinit();
+
             var reader = std.Io.Reader.fixed(payload);
-            var msg = FromRadio.decode(&reader, allocator) catch |err| {
+            var msg = FromRadio.decode(&reader, arena.allocator()) catch |err| {
                 try stderr.print("protobuf decode error: {}\n", .{err});
                 try stderr.flush();
                 continue;
             };
-            defer msg.deinit(allocator);
 
-            const json = msg.jsonEncode(.{}, allocator) catch |err| {
+            const json = msg.jsonEncode(.{}, arena.allocator()) catch |err| {
                 try stderr.print("json encode error: {}\n", .{err});
                 try stderr.flush();
                 continue;
             };
-            defer allocator.free(json);
 
             try stdout.writeAll(json);
             try stdout.writeAll("\n");
