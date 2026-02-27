@@ -49,8 +49,6 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
-    exe.step.dependOn(&protoc_step.step);
-
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);
@@ -66,14 +64,12 @@ pub fn build(b: *std.Build) void {
     const mod_tests = b.addTest(.{
         .root_module = mod,
     });
-    mod_tests.step.dependOn(&protoc_step.step);
     const run_mod_tests = b.addRunArtifact(mod_tests);
 
     // Tests — executable module
     const exe_tests = b.addTest(.{
         .root_module = exe.root_module,
     });
-    exe_tests.step.dependOn(&protoc_step.step);
     const run_exe_tests = b.addRunArtifact(exe_tests);
 
     const test_step = b.step("test", "Run unit tests");
