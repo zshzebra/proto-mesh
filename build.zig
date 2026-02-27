@@ -26,7 +26,16 @@ pub fn build(b: *std.Build) void {
 
     gen_proto.dependOn(&protoc_step.step);
 
-    // Main executable — depends on proto codegen
+    // Library module
+    const mod = b.addModule("proto-mesh", .{
+        .root_source_file = b.path("src/root.zig"),
+        .target = target,
+        .imports = &.{
+            .{ .name = "protobuf", .module = protobuf_dep.module("protobuf") },
+        },
+    });
+
+    // Main executable
     const exe = b.addExecutable(.{
         .name = "proto-mesh",
         .root_module = b.createModule(.{
@@ -34,7 +43,7 @@ pub fn build(b: *std.Build) void {
             .target = target,
             .optimize = optimize,
             .imports = &.{
-                .{ .name = "protobuf", .module = protobuf_dep.module("protobuf") },
+                .{ .name = "proto-mesh", .module = mod },
                 .{ .name = "serial", .module = serial_dep.module("serial") },
             },
         }),
@@ -52,4 +61,22 @@ pub fn build(b: *std.Build) void {
 
     const run_step = b.step("run", "Run proto-mesh");
     run_step.dependOn(&run_cmd.step);
+
+    // Tests — library module
+    const mod_tests = b.addTest(.{
+        .root_module = mod,
+    });
+    mod_tests.step.dependOn(&protoc_step.step);
+    const run_mod_tests = b.addRunArtifact(mod_tests);
+
+    // Tests — executable module
+    const exe_tests = b.addTest(.{
+        .root_module = exe.root_module,
+    });
+    exe_tests.step.dependOn(&protoc_step.step);
+    const run_exe_tests = b.addRunArtifact(exe_tests);
+
+    const test_step = b.step("test", "Run unit tests");
+    test_step.dependOn(&run_mod_tests.step);
+    test_step.dependOn(&run_exe_tests.step);
 }

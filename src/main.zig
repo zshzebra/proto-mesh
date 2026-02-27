@@ -1,9 +1,8 @@
 const std = @import("std");
-const protobuf = @import("protobuf");
 const serial = @import("serial");
-const FrameReader = @import("framing.zig").FrameReader;
-const meshtastic = @import("gen/meshtastic.pb.zig");
-const FromRadio = meshtastic.FromRadio;
+const proto_mesh = @import("proto-mesh");
+const FrameReader = proto_mesh.FrameReader;
+const decodeFromRadio = proto_mesh.decodeFromRadio;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -68,15 +67,8 @@ pub fn main() !void {
             var arena = std.heap.ArenaAllocator.init(allocator);
             defer arena.deinit();
 
-            var reader = std.Io.Reader.fixed(payload);
-            var msg = FromRadio.decode(&reader, arena.allocator()) catch |err| {
+            const json = decodeFromRadio(&arena, payload) catch |err| {
                 try stderr.print("protobuf decode error: {}\n", .{err});
-                try stderr.flush();
-                continue;
-            };
-
-            const json = msg.jsonEncode(.{}, arena.allocator()) catch |err| {
-                try stderr.print("json encode error: {}\n", .{err});
                 try stderr.flush();
                 continue;
             };
